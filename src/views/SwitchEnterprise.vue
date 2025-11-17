@@ -90,8 +90,8 @@ const showUserInfo = ref(false)
 
 // 用户信息
 const userInfo = ref({
-  firstName: 'John',
-  surname: 'Doe',
+  firstName: 'Alex',
+  surname: 'Smith',
   email: 'user@example.com',
   role: 'Admin' // User, Admin, Operator
 })

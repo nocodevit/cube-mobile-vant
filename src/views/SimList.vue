@@ -40,8 +40,9 @@
 
     <!-- SIM 列表 -->
     <div class="list-section">
-      <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-        <van-list v-model:loading="loading" :finished="finished" finished-text="No more data" @load="onLoad">
+      <van-pull-refresh v-model="refreshing" @refresh="onRefresh" loading-text="Loading...">
+        <van-list v-model:loading="loading" :finished="finished" finished-text="No more data" loading-text="Loading..."
+          @load="onLoad">
           <van-cell v-for="sim in displayList" :key="sim.id" is-link @click="goToDetail(sim.id)" class="sim-item">
             <template #title>
               <div class="sim-item-header">
@@ -186,8 +187,8 @@ const showUserInfo = ref(false)
 
 // 用户信息
 const userInfo = ref({
-  firstName: 'John',
-  surname: 'Doe',
+  firstName: 'Alex',
+  surname: 'Smith',
   email: 'user@example.com',
   role: 'Admin' // User, Admin, Operator
 })
