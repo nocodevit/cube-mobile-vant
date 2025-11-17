@@ -128,14 +128,14 @@ const scrollToBottom = () => {
 }
 
 .message-content {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   word-wrap: break-word;
   margin-bottom: 4px;
 }
 
 .message-time {
-  font-size: 11px;
+  font-size: 13px;
   opacity: 0.7;
   text-align: right;
   margin-top: 4px;

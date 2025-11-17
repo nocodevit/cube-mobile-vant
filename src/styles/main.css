@@ -13,6 +13,11 @@
   font-family: 'Archivo', sans-serif;
 }
 
+/* 全局基础字体大小增大 */
+body {
+  font-size: 16px;
+}
+
 /* 防止 loading toast 文字折行 */
 :deep(.van-toast__text) {
   white-space: nowrap;

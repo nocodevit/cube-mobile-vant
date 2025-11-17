@@ -232,7 +232,7 @@ const handleSendSMS = () => {
 }
 
 .iccid-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: #323233;
   flex: 1;
@@ -299,7 +299,7 @@ const handleSendSMS = () => {
 }
 
 :deep(.info-group .van-cell-group__title) {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #323233;
   padding: 12px 16px;
@@ -315,9 +315,8 @@ const handleSendSMS = () => {
   color: #646566;
 }
 
-/* ICCID 值字号小一点，确保不折行 */
+/* ICCID 值确保不折行 */
 :deep(.iccid-cell .van-cell__value) {
-  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -328,7 +327,7 @@ const handleSendSMS = () => {
 .usage-highlight {
   color: #646566;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .progress-section {
@@ -343,13 +342,13 @@ const handleSendSMS = () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  font-size: 14px;
+  font-size: 16px;
   color: #646566;
 }
 
 .progress-text {
   color: #969799;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .usage-progress-wrapper {

@@ -508,7 +508,7 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -535,7 +535,7 @@ const handleLogout = async () => {
 .brand-text {
   font-family: 'Archivo', sans-serif;
   color: #323233;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
   letter-spacing: 1px;
 }
@@ -621,7 +621,7 @@ const handleLogout = async () => {
 }
 
 .sim-iccid {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #646566;
   flex: 1;
@@ -708,12 +708,12 @@ const handleLogout = async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .usage-text {
   color: #646566;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .usage-progress-wrapper {
@@ -851,7 +851,7 @@ const handleLogout = async () => {
 }
 
 :deep(.van-tabbar-item__icon) {
-  font-size: 20px;
+  font-size: 22px;
 }
 
 /* 用户信息面板样式 - 重新设计 */
@@ -868,7 +868,7 @@ const handleLogout = async () => {
 
 .user-info-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: #323233;
 }
@@ -889,14 +889,14 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 600;
   margin: 0 auto 16px;
   border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .user-info-name {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   opacity: 0.95;
   word-break: break-all;
@@ -928,12 +928,12 @@ const handleLogout = async () => {
 
 :deep(.user-info-details .van-cell__title) {
   color: #969799;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 :deep(.user-info-details .van-cell__value) {
   color: #323233;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -941,7 +941,7 @@ const handleLogout = async () => {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 
