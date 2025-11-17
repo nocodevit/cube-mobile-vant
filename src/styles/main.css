@@ -1,0 +1,26 @@
+:root {
+  --cube-primary-color: #ea1845;
+  --cube-primary-light: #ff4d6d;
+  --cube-primary-dark: #c4123a;
+  --cube-text-primary: #323233;
+  --cube-text-secondary: #969799;
+  --cube-border-color: #ebedf0;
+  --cube-background: #f7f8fa;
+}
+
+/* 全局字体设置为 Archivo */
+* {
+  font-family: 'Archivo', sans-serif;
+}
+
+/* 防止 loading toast 文字折行 */
+:deep(.van-toast__text) {
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+/* 覆盖 Vant 主题色 */
+.van-theme-light {
+  --van-primary-color: var(--cube-primary-color);
+}
+

@@ -1,0 +1,5 @@
+# Assets 目录
+# 请将 logo 文件放在此目录下
+# 支持的格式：logo.png, logo.svg, logo.jpg
+# 如果添加了 logo，请在 SimList.vue 中取消注释 logo 导入代码
+
