@@ -18,10 +18,20 @@ body {
   font-size: 16px;
 }
 
-/* 防止 loading toast 文字折行 */
-:deep(.van-toast__text) {
-  white-space: nowrap;
-  word-break: keep-all;
+/* 防止 toast 和 loading toast 文字折行 - 单词不能拆开 */
+:deep(.van-toast__text),
+:deep(.van-loading__text),
+:deep(.van-loading__text span),
+:deep(.van-loading__text *) {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow: visible !important;
+}
+
+:deep(.van-toast),
+:deep(.van-loading) {
+  max-width: 90vw !important;
+  word-break: normal !important;
 }
 
 /* 覆盖 Vant 主题色 */

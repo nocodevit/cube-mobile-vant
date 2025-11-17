@@ -23,15 +23,9 @@
 
       <div class="enterprise-list">
         <van-cell-group>
-          <van-cell
-            v-for="enterprise in enterprises"
-            :key="enterprise.id"
-            :title="enterprise.name"
-            :label="enterprise.description"
-            :class="{ 'active': enterprise.name === currentEnterprise }"
-            is-link
-            @click="switchEnterprise(enterprise)"
-          >
+          <van-cell v-for="enterprise in enterprises" :key="enterprise.id" :title="enterprise.name"
+            :label="enterprise.description" :class="{ 'active': enterprise.name === currentEnterprise }" is-link
+            @click="switchEnterprise(enterprise)">
             <template #right-icon>
               <van-icon v-if="enterprise.name === currentEnterprise" name="success" color="#ea1845" />
             </template>
@@ -41,28 +35,7 @@
     </div>
 
     <!-- 用户信息弹窗 -->
-    <van-popup v-model:show="showUserInfo" position="top" :style="{ paddingTop: '20px' }" round>
-      <div class="user-info-panel">
-        <div class="user-info-header">
-          <h3 class="user-info-title">Profile Information</h3>
-        </div>
-        <div class="user-info-details">
-          <van-cell-group :border="false">
-            <van-cell title="First Name" :value="userInfo.firstName" :border="false" />
-            <van-cell title="Surname" :value="userInfo.surname" :border="false" />
-            <van-cell title="Email" :value="userInfo.email" :border="false" />
-            <van-cell title="Role" :border="false">
-              <template #value>
-                <span class="role-badge" :class="'role-' + userInfo.role.toLowerCase()">{{ userInfo.role }}</span>
-              </template>
-            </van-cell>
-          </van-cell-group>
-        </div>
-        <div class="user-info-footer">
-          <van-button block type="primary" round @click="handleLogout">Logout</van-button>
-        </div>
-      </div>
-    </van-popup>
+    <UserInfoPopup v-model:show="showUserInfo" :user-info="userInfo" @logout="handleLogout" />
 
     <!-- 底部导航栏 -->
     <van-tabbar v-model="activeTabbar" fixed>
@@ -78,6 +51,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast, showConfirmDialog, showLoadingToast, closeToast } from 'vant'
+import UserInfoPopup from '@/components/UserInfoPopup.vue'
 
 const router = useRouter()
 
@@ -129,25 +103,25 @@ const switchEnterprise = async (enterprise) => {
   if (enterprise.name === currentEnterprise.value) {
     return
   }
-  
+
   // 显示切换企业的 loading
   showLoadingToast({
     message: 'Switching enterprise',
     forbidClick: true,
     duration: 0
   })
-  
+
   // 模拟切换延迟
   await new Promise(resolve => setTimeout(resolve, 500))
-  
+
   currentEnterprise.value = enterprise.name
   localStorage.setItem('currentEnterprise', enterprise.name)
   // 设置一个标志，表示企业已切换，需要重新加载数据
   localStorage.setItem('enterpriseSwitched', 'true')
-  
+
   // 关闭切换企业的 loading
   closeToast()
-  
+
   // 切换后返回 SIM 主页
   router.push('/sim-list')
 }
@@ -315,126 +289,4 @@ const handleLogout = async () => {
 :deep(.van-tabbar-item__icon) {
   font-size: 22px;
 }
-
-/* 用户信息面板样式 - 重新设计 */
-.user-info-panel {
-  background-color: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.user-info-header {
-  padding: 20px 16px 16px 16px;
-  border-bottom: 1px solid #ebedf0;
-}
-
-.user-info-title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #323233;
-}
-
-.user-info-avatar-section {
-  background: linear-gradient(135deg, #ea1845 0%, #c4123a 100%);
-  padding: 32px 24px;
-  text-align: center;
-  color: #fff;
-}
-
-.user-info-avatar-large {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  font-weight: 600;
-  margin: 0 auto 16px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-}
-
-.user-info-name {
-  font-size: 18px;
-  font-weight: 500;
-  opacity: 0.95;
-  word-break: break-all;
-}
-
-.user-info-details {
-  padding: 0;
-}
-
-:deep(.user-info-details .van-cell-group) {
-  border: none;
-  box-shadow: none;
-}
-
-:deep(.user-info-details .van-cell) {
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-:deep(.user-info-details .van-cell:not(:last-child)) {
-  border-bottom: 1px solid #ebedf0;
-}
-
-:deep(.user-info-details .van-cell:last-child) {
-  border-bottom: none;
-}
-
-:deep(.user-info-details .van-cell__title) {
-  color: #969799;
-  font-size: 16px;
-}
-
-:deep(.user-info-details .van-cell__value) {
-  color: #323233;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.role-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.role-user {
-  background-color: rgba(100, 101, 102, 0.1);
-  color: #646566;
-}
-
-.role-admin {
-  background-color: rgba(234, 24, 69, 0.1);
-  color: #ea1845;
-}
-
-.role-operator {
-  background-color: rgba(7, 193, 96, 0.1);
-  color: #07c160;
-}
-
-.user-info-footer {
-  padding: 16px;
-  border-top: 1px solid #ebedf0;
-}
-
-:deep(.user-info-footer .van-button--primary) {
-  background-color: #ea1845 !important;
-  border-color: #ea1845 !important;
-}
-
-:deep(.user-info-footer .van-button--primary:active) {
-  background-color: #c4123a !important;
-  border-color: #c4123a !important;
-}
 </style>
-

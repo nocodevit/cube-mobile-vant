@@ -22,5 +22,13 @@ body {
   min-height: 100vh;
   background-color: #f7f8fa;
 }
+
+/* 全局强制防止 loading toast 文字折行 - 单词不能拆开 */
+.van-loading__text,
+.van-loading__text * {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow: visible !important;
+}
 </style>
 
