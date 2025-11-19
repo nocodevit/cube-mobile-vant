@@ -1,11 +1,17 @@
 :root {
+  /* CSS 变量将在 main.js 中动态设置，这些是默认值 */
   --cube-primary-color: #ea1845;
   --cube-primary-light: #ff4d6d;
   --cube-primary-dark: #c4123a;
+  --cube-secondary-color: #ea1845;
   --cube-text-primary: #323233;
   --cube-text-secondary: #969799;
   --cube-border-color: #ebedf0;
   --cube-background: #f7f8fa;
+  /* Gradient 配置 */
+  --cube-gradient-enabled: 0;
+  --cube-gradient-start: var(--cube-primary-color);
+  --cube-gradient-end: var(--cube-secondary-color);
 }
 
 /* 全局字体设置为 Archivo */
@@ -19,17 +25,54 @@ body {
 }
 
 /* 防止 toast 和 loading toast 文字折行 - 单词不能拆开 */
-:deep(.van-toast__text),
-:deep(.van-loading__text),
-:deep(.van-loading__text span),
-:deep(.van-loading__text *) {
+/* 这是 Vant 的已知问题，默认样式可能会拆开单词 */
+/* 解决方案：使用 word-break: normal 只在空格处断行，或 white-space: nowrap 完全不换行 */
+/* 注意：main.css 是全局样式，不需要 :deep() 选择器 */
+.van-toast,
+.van-toast *,
+.van-toast__text,
+.van-toast__text * {
+  /* 防止单词被拆分 - 只在空格或连字符处断行 */
+  word-break: normal !important;
+  /* 只在单词太长无法容纳时才断行 */
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  /* 禁用连字符 */
+  hyphens: none !important;
+  /* 允许换行，但遵循上面的规则 */
+  white-space: normal !important;
+  max-width: 90vw !important;
+}
+
+/* 对于纯文本 toast（通常较短），可以不换行 */
+.van-toast--text,
+.van-toast--text *,
+.van-toast--text .van-toast__text {
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+
+/* success/error/warning 类型的 toast 也应用相同的规则 */
+.van-toast--success .van-toast__text,
+.van-toast--error .van-toast__text,
+.van-toast--warning .van-toast__text,
+.van-toast--success .van-toast__text *,
+.van-toast--error .van-toast__text *,
+.van-toast--warning .van-toast__text * {
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  white-space: normal !important;
+}
+
+.van-loading__text,
+.van-loading__text span,
+.van-loading__text * {
   white-space: nowrap !important;
   word-break: normal !important;
   overflow: visible !important;
 }
 
-:deep(.van-toast),
-:deep(.van-loading) {
+.van-loading {
   max-width: 90vw !important;
   word-break: normal !important;
 }
@@ -37,5 +80,25 @@ body {
 /* 覆盖 Vant 主题色 */
 .van-theme-light {
   --van-primary-color: var(--cube-primary-color);
+}
+
+/* 渐变按钮样式 - 当 gradient 启用时，所有 primary 按钮使用渐变背景 */
+/* 默认使用纯色背景 */
+.van-button--primary {
+  background-color: var(--cube-primary-color);
+  border-color: var(--cube-primary-color);
+}
+
+/* 当 gradient 启用时，使用渐变背景（从 primary 到 secondary） */
+:root[data-gradient-enabled="true"] .van-button--primary {
+  background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* active 状态也需要渐变（稍微深一点） */
+:root[data-gradient-enabled="true"] .van-button--primary:active {
+  opacity: 0.9;
+  filter: brightness(0.95);
 }
 

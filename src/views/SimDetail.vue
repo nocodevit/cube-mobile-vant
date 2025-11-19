@@ -1,8 +1,8 @@
 <template>
   <div class="sim-detail-page" v-if="sim">
     <!-- 顶部导航栏 -->
-    <van-nav-bar title="SIM Details" fixed left-arrow @click-left="$router.back()"
-      :style="{ backgroundColor: '#ea1845', color: '#fff' }" />
+      <van-nav-bar title="SIM Details" fixed left-arrow @click-left="$router.back()"
+      :style="{ backgroundColor: themeConfig.primary, color: '#fff' }" />
 
     <!-- SIM 卡片 -->
     <div class="detail-content">
@@ -86,9 +86,31 @@
         </div>
       </div>
 
+      <!-- Pause/Resume Switch (仅对 active 状态显示) -->
+      <div v-if="sim.status === 'active' || sim.status === 'paused'" class="switch-section">
+        <div class="switch-card">
+          <div class="switch-content">
+            <div class="switch-label">
+              <span class="switch-title">{{ sim.status === 'active' ? 'Active' : 'Paused' }}</span>
+              <span class="switch-desc">{{ sim.status === 'active' ? 'Tap to pause the SIM' : 'Tap to resume the SIM' }}</span>
+            </div>
+            <van-switch 
+              :model-value="switchValue"
+              :loading="switchLoading"
+              :disabled="switchLoading"
+              size="24px"
+              @update:model-value="handleSwitchChange"
+            />
+          </div>
+        </div>
+      </div>
+
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <van-button type="primary" block round icon="replay" @click="handleRefresh">
+        <van-button v-if="sim.status === 'pre-activated'" type="primary" block round icon="success" @click="handleActivate">
+          Activate
+        </van-button>
+        <van-button type="primary" block round icon="replay" :style="sim.status === 'pre-activated' ? 'margin-top: 12px;' : ''" @click="handleRefresh">
           Refresh SIM
         </van-button>
         <van-button type="default" block round icon="chat-o" style="margin-top: 12px;" @click="handleViewSMS">
@@ -104,14 +126,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getSimById } from '@/mock.js'
 import { showToast, showConfirmDialog } from 'vant'
+import themeConfig from '@/config/theme.js'
 
 const route = useRoute()
 const router = useRouter()
 const sim = ref(null)
+const switchLoading = ref(false)
+
+// Switch 的值：true = active, false = paused
+const switchValue = computed(() => sim.value?.status === 'active')
 
 onMounted(() => {
   const id = route.params.id
@@ -130,7 +157,8 @@ const getStatusType = (status) => {
     'active': 'success',
     'pre-activated': 'primary',
     'suspended': 'warning',
-    'expired': 'danger'
+    'expired': 'danger',
+    'paused': 'warning'
   }
   return statusMap[status] || 'default'
 }
@@ -155,7 +183,7 @@ const getProgressColor = () => {
   const percentage = getUsagePercentage()
   if (percentage >= 90) return '#ee0a24'
   if (percentage >= 70) return '#ff976a'
-  return '#ea1845'
+  return themeConfig.primary
 }
 
 // 刷新状态
@@ -186,6 +214,63 @@ const handleViewSMS = () => {
 const handleSendSMS = () => {
   showToast('SMS feature coming soon')
 }
+
+// 激活 SIM 卡
+const handleActivate = async () => {
+  if (!sim.value) return
+  
+  try {
+    await showConfirmDialog({
+      title: 'Activate Plan',
+      message: `This will activate the plan "${sim.value.plan}". Billing will start after success. Are you sure?`,
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel'
+    })
+    // 这里可以添加实际的激活逻辑
+    showToast({
+      type: 'success',
+      message: 'SIM activation request sent successfully!'
+    })
+    // 可选：更新状态
+    // sim.value.status = 'active'
+    // sim.value.statusText = 'Active'
+  } catch {
+    // 用户取消
+  }
+}
+
+// 处理 Switch 切换
+const handleSwitchChange = async (value) => {
+  if (!sim.value) return
+  
+  // 显示 loading（在 switch 按钮上）
+  switchLoading.value = true
+  
+  // 模拟 API 请求延迟
+  await new Promise(resolve => setTimeout(resolve, 1500))
+  
+  // 更新状态
+  if (value) {
+    // 打开：变为 Active
+    sim.value.status = 'active'
+    sim.value.statusText = 'Active'
+    showToast({
+      type: 'success',
+      message: 'SIM resumed successfully!'
+    })
+  } else {
+    // 关闭：变为 Paused
+    sim.value.status = 'paused'
+    sim.value.statusText = 'Paused'
+    showToast({
+      type: 'success',
+      message: 'SIM paused successfully!'
+    })
+  }
+  
+  // 关闭 loading
+  switchLoading.value = false
+}
 </script>
 
 <style scoped>
@@ -193,7 +278,7 @@ const handleSendSMS = () => {
   padding-top: 46px;
   padding-bottom: 20px;
   min-height: 100vh;
-  background-color: #f7f8fa;
+  background-color: var(--cube-background);
 }
 
 .detail-content {
@@ -205,12 +290,12 @@ const handleSendSMS = () => {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid #ea1845;
+  border: 1px solid var(--cube-primary-color);
   border-radius: 12px;
   margin-bottom: 16px;
   margin-top: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(234, 24, 69, 0.1);
+  box-shadow: 0 2px 8px var(--cube-primary-rgba-shadow);
   position: sticky;
   top: 62px;
   z-index: 1;
@@ -234,7 +319,7 @@ const handleSendSMS = () => {
 .iccid-title {
   font-size: 20px;
   font-weight: 600;
-  color: #323233;
+  color: var(--cube-text-primary);
   flex: 1;
 }
 
@@ -247,8 +332,8 @@ const handleSendSMS = () => {
 }
 
 :deep(.payment-prepaid) {
-  background-color: rgba(234, 24, 69, 0.1) !important;
-  color: #ea1845 !important;
+  background-color: var(--cube-primary-rgba-light) !important;
+  color: var(--cube-primary-color) !important;
 }
 
 :deep(.payment-postpaid) {
@@ -271,7 +356,7 @@ const handleSendSMS = () => {
 }
 
 :deep(.status-tag.van-tag--primary) {
-  background-color: rgba(234, 24, 69, 0.15) !important;
+  background-color: var(--cube-primary-rgba-medium) !important;
   color: rgba(234, 24, 69, 0.9) !important;
 }
 
@@ -291,6 +376,12 @@ const handleSendSMS = () => {
   color: rgba(100, 181, 246, 0.9) !important;
 }
 
+/* paused 状态使用警告色 */
+:deep(.status-tag[data-status="paused"]) {
+  background-color: rgba(255, 193, 7, 0.15) !important;
+  color: rgba(255, 193, 7, 0.9) !important;
+}
+
 
 .info-group {
   margin-bottom: 16px;
@@ -301,7 +392,7 @@ const handleSendSMS = () => {
 :deep(.info-group .van-cell-group__title) {
   font-size: 18px;
   font-weight: 600;
-  color: #323233;
+  color: var(--cube-text-primary);
   padding: 12px 16px;
   background-color: #fff;
 }
@@ -347,7 +438,7 @@ const handleSendSMS = () => {
 }
 
 .progress-text {
-  color: #969799;
+  color: var(--cube-text-secondary);
   font-size: 14px;
 }
 
@@ -389,6 +480,49 @@ const handleSendSMS = () => {
   }
 }
 
+.switch-section {
+  margin-bottom: 16px;
+}
+
+.switch-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.switch-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.switch-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.switch-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cube-text-primary);
+}
+
+.switch-desc {
+  font-size: 14px;
+  color: var(--cube-text-secondary);
+}
+
+:deep(.van-switch--on) {
+  background-color: var(--cube-primary-color);
+}
+
+:deep(.van-switch--on:active) {
+  background-color: var(--cube-primary-dark);
+}
+
 .action-buttons {
   margin-top: 24px;
   padding: 0 16px;
@@ -397,7 +531,7 @@ const handleSendSMS = () => {
 }
 
 :deep(.van-nav-bar) {
-  background-color: #ea1845;
+  background-color: var(--cube-primary-color);
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
   overflow: hidden;
@@ -414,12 +548,26 @@ const handleSendSMS = () => {
 }
 
 :deep(.van-button--primary) {
-  background-color: #ea1845;
-  border-color: #ea1845;
+  background-color: var(--cube-primary-color);
+  border-color: var(--cube-primary-color);
+}
+
+/* 当 gradient 启用时，使用渐变背景 */
+:root[data-gradient-enabled="true"] :deep(.van-button--primary) {
+  background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 :deep(.van-button--primary:active) {
-  background-color: #c4123a;
-  border-color: #c4123a;
+  background-color: var(--cube-primary-dark);
+  border-color: var(--cube-primary-dark);
+}
+
+:root[data-gradient-enabled="true"] :deep(.van-button--primary:active) {
+  opacity: 0.9;
+  filter: brightness(0.95);
+  background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
+  background-color: transparent !important;
 }
 </style>

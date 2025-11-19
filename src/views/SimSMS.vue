@@ -2,7 +2,7 @@
   <div class="sms-page">
     <!-- 顶部导航栏 -->
     <van-nav-bar :title="`SMS - ${sim?.iccid || ''}`" fixed left-arrow @click-left="$router.back()"
-      :style="{ backgroundColor: '#ea1845', color: '#fff' }" />
+      :style="{ backgroundColor: themeConfig.primary, color: '#fff' }" />
 
     <div class="sms-content">
       <!-- 聊天消息列表 -->
@@ -22,6 +22,7 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { getSimById, getSmsMessages } from '@/mock.js'
+import themeConfig from '@/config/theme.js'
 
 const route = useRoute()
 const sim = ref(null)
@@ -122,7 +123,7 @@ const scrollToBottom = () => {
 }
 
 .message-item.sent .message-bubble {
-  background-color: #ea1845;
+  background-color: var(--cube-primary-color);
   color: #fff;
   border-bottom-right-radius: 4px;
 }
@@ -151,7 +152,7 @@ const scrollToBottom = () => {
 }
 
 :deep(.van-nav-bar) {
-  background-color: #ea1845;
+  background-color: var(--cube-primary-color);
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
   overflow: hidden;

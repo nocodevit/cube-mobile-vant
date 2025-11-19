@@ -1,5 +1,5 @@
 <template>
-  <van-popup v-model:show="show" position="top" :style="{ paddingTop: '20px' }" round>
+  <van-popup :show="show" @update:show="updateShow" position="top" :style="{ paddingTop: '20px' }" round>
     <div class="user-info-panel">
       <div class="user-info-header">
         <h3 class="user-info-title">Profile Information</h3>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
   show: {
@@ -45,10 +45,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:show', 'logout'])
 
-const show = computed({
-  get: () => props.show,
-  set: (value) => emit('update:show', value)
-})
+const updateShow = (value) => {
+  emit('update:show', value)
+}
 
 const handleLogout = () => {
   emit('logout')
@@ -72,7 +71,7 @@ const handleLogout = () => {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #323233;
+  color: var(--cube-text-primary);
 }
 
 .user-info-details {
@@ -100,12 +99,12 @@ const handleLogout = () => {
 }
 
 :deep(.user-info-details .van-cell__title) {
-  color: #969799;
+  color: var(--cube-text-secondary);
   font-size: 16px;
 }
 
 :deep(.user-info-details .van-cell__value) {
-  color: #323233;
+  color: var(--cube-text-primary);
   font-size: 16px;
   font-weight: 500;
 }
@@ -124,8 +123,8 @@ const handleLogout = () => {
 }
 
 .role-admin {
-  background-color: rgba(234, 24, 69, 0.1);
-  color: #ea1845;
+  background-color: var(--cube-primary-rgba-light);
+  color: var(--cube-primary-color);
 }
 
 .role-operator {
@@ -138,12 +137,26 @@ const handleLogout = () => {
 }
 
 :deep(.user-info-footer .van-button--primary) {
-  background-color: #ea1845 !important;
-  border-color: #ea1845 !important;
+  background-color: var(--cube-primary-color) !important;
+  border-color: var(--cube-primary-color) !important;
+}
+
+/* 当 gradient 启用时，使用渐变背景 */
+:root[data-gradient-enabled="true"] :deep(.user-info-footer .van-button--primary) {
+  background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 :deep(.user-info-footer .van-button--primary:active) {
-  background-color: #c4123a !important;
-  border-color: #c4123a !important;
+  background-color: var(--cube-primary-dark) !important;
+  border-color: var(--cube-primary-dark) !important;
+}
+
+:root[data-gradient-enabled="true"] :deep(.user-info-footer .van-button--primary:active) {
+  opacity: 0.9;
+  filter: brightness(0.95);
+  background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
+  background-color: transparent !important;
 }
 </style>

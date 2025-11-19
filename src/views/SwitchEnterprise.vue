@@ -4,8 +4,8 @@
     <div class="custom-banner">
       <div class="banner-content">
         <div class="logo-container">
-          <img v-if="logoExists" :src="logoImg" alt="Cube Logo" class="logo-img" />
-          <span class="brand-text">Cube</span>
+          <img v-if="logoExists" :src="logoImg" alt="Logo" class="logo-img" />
+          <span v-if="themeConfig.brandName" class="brand-text">{{ themeConfig.brandName }}</span>
         </div>
         <div class="banner-right">
           <div class="user-avatar" @click="showUserInfo = true">
@@ -27,7 +27,7 @@
             :label="enterprise.description" :class="{ 'active': enterprise.name === currentEnterprise }" is-link
             @click="switchEnterprise(enterprise)">
             <template #right-icon>
-              <van-icon v-if="enterprise.name === currentEnterprise" name="success" color="#ea1845" />
+              <van-icon v-if="enterprise.name === currentEnterprise" name="success" :color="themeConfig.primary" />
             </template>
           </van-cell>
         </van-cell-group>
@@ -52,11 +52,22 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast, showConfirmDialog, showLoadingToast, closeToast } from 'vant'
 import UserInfoPopup from '@/components/UserInfoPopup.vue'
+import themeConfig from '@/config/theme.js'
 
 const router = useRouter()
 
-// 导入 logo
-import logoImg from '@/assets/logo.png'
+// 导入所有可能的 logo
+import logoLinksfield from '@/assets/logo.png'
+import logoThg from '@/assets/logo-thg.png'
+
+// 根据主题配置选择对应的 logo
+const logoImg = computed(() => {
+  const logoMap = {
+    'logo.png': logoLinksfield,
+    'logo-thg.png': logoThg
+  }
+  return logoMap[themeConfig.logo] || logoLinksfield
+})
 
 const logoExists = ref(true)
 const activeTabbar = ref(2) // Switch 是第三个，索引为 2
@@ -180,7 +191,7 @@ const handleLogout = async () => {
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   flex: 1;
 }
 
@@ -197,8 +208,8 @@ const handleLogout = async () => {
   height: 32px;
   border-radius: 16px;
   background-color: transparent;
-  border: 1px solid #ea1845;
-  color: #ea1845;
+  border: 1px solid var(--cube-primary-color);
+  color: var(--cube-primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -226,7 +237,7 @@ const handleLogout = async () => {
 
 .brand-text {
   font-family: 'Archivo', sans-serif;
-  color: #323233;
+  color: var(--cube-text-primary);
   font-size: 24px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -254,7 +265,7 @@ const handleLogout = async () => {
 .current-name {
   font-size: 20px;
   font-weight: 600;
-  color: #323233;
+  color: var(--cube-text-primary);
 }
 
 .enterprise-list {
@@ -277,13 +288,13 @@ const handleLogout = async () => {
 }
 
 :deep(.enterprise-list .active .van-cell__title) {
-  color: #ea1845;
+  color: var(--cube-primary-color);
   font-weight: 600;
 }
 
 /* 底部导航栏样式 */
 :deep(.van-tabbar-item--active) {
-  color: #ea1845;
+  color: var(--cube-primary-color);
 }
 
 :deep(.van-tabbar-item__icon) {

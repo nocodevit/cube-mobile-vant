@@ -4,8 +4,8 @@
     <div class="custom-banner">
       <div class="banner-content">
         <div class="logo-container">
-          <img v-if="logoExists" :src="logoImg" alt="Cube Logo" class="logo-img" />
-          <span class="brand-text">Cube</span>
+          <img v-if="logoExists" :src="logoImg" alt="Logo" class="logo-img" />
+          <span v-if="themeConfig.brandName" class="brand-text">{{ themeConfig.brandName }}</span>
         </div>
         <div class="banner-right">
           <div class="user-avatar" @click.stop="handleUserClick">
@@ -144,11 +144,22 @@ import { useRouter } from 'vue-router'
 import { getSimsPaginated, getOperators, getLocations, getPlans, getTags } from '@/mock.js'
 import { showConfirmDialog, showToast, showLoadingToast, closeToast } from 'vant'
 import UserInfoPopup from '@/components/UserInfoPopup.vue'
+import themeConfig from '@/config/theme.js'
 
 const router = useRouter()
 
-// 导入 logo
-import logoImg from '@/assets/logo.png'
+// 导入所有可能的 logo
+import logoLinksfield from '@/assets/logo.png'
+import logoThg from '@/assets/logo-thg.png'
+
+// 根据主题配置选择对应的 logo
+const logoImg = computed(() => {
+  const logoMap = {
+    'logo.png': logoLinksfield,
+    'logo-thg.png': logoThg
+  }
+  return logoMap[themeConfig.logo] || logoLinksfield
+})
 
 const logoExists = ref(true)
 
@@ -410,7 +421,7 @@ const getProgressColor = (sim) => {
   const percentage = getUsagePercentage(sim)
   if (percentage >= 90) return '#ee0a24'
   if (percentage >= 70) return '#ff976a'
-  return '#ea1845'
+  return themeConfig.primary
 }
 
 // 处理登出
@@ -439,7 +450,7 @@ const handleLogout = async () => {
   padding-top: 0;
   padding-bottom: 50px;
   min-height: 100vh;
-  background-color: #f7f8fa;
+  background-color: var(--cube-background);
 }
 
 /* 无颜色 Banner */
@@ -467,7 +478,7 @@ const handleLogout = async () => {
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   flex: 1;
 }
 
@@ -484,8 +495,8 @@ const handleLogout = async () => {
   height: 32px;
   border-radius: 16px;
   background-color: transparent;
-  border: 1px solid #ea1845;
-  color: #ea1845;
+  border: 1px solid var(--cube-primary-color);
+  color: var(--cube-primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -503,7 +514,7 @@ const handleLogout = async () => {
 }
 
 .user-avatar:active {
-  background-color: rgba(234, 24, 69, 0.1);
+  background-color: var(--cube-primary-rgba-light);
   opacity: 0.8;
 }
 
@@ -515,7 +526,7 @@ const handleLogout = async () => {
 
 .brand-text {
   font-family: 'Archivo', sans-serif;
-  color: #323233;
+  color: var(--cube-text-primary);
   font-size: 24px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -556,16 +567,16 @@ const handleLogout = async () => {
 
 .filter-btn {
   flex-shrink: 0;
-  background-color: #ea1845 !important;
-  border-color: #ea1845 !important;
+  background-color: var(--cube-primary-color) !important;
+  border-color: var(--cube-primary-color) !important;
   color: #fff !important;
   position: relative;
   z-index: 1;
 }
 
 :deep(.filter-btn) {
-  background-color: #ea1845 !important;
-  border-color: #ea1845 !important;
+  background-color: var(--cube-primary-color) !important;
+  border-color: var(--cube-primary-color) !important;
   color: #fff !important;
 }
 
@@ -669,7 +680,7 @@ const handleLogout = async () => {
 }
 
 .sim-info-row .label {
-  color: #969799;
+  color: var(--cube-text-secondary);
   margin-right: 8px;
   min-width: 80px;
 }
@@ -753,11 +764,11 @@ const handleLogout = async () => {
 
 
 :deep(.van-tabs__line) {
-  background-color: #ea1845;
+  background-color: var(--cube-primary-color);
 }
 
 :deep(.van-tab--active) {
-  color: #ea1845;
+  color: var(--cube-primary-color);
 }
 
 /* 筛选面板样式 */
@@ -778,12 +789,12 @@ const handleLogout = async () => {
 .filter-title {
   font-size: 18px;
   font-weight: 600;
-  color: #323233;
+  color: var(--cube-text-primary);
 }
 
 .clear-all-btn {
   font-size: 14px;
-  color: #ea1845;
+  color: var(--cube-primary-color);
   text-decoration: underline;
   cursor: pointer;
   user-select: none;
@@ -812,23 +823,37 @@ const handleLogout = async () => {
 
 /* Filter 面板内的按钮使用主题色 */
 :deep(.filter-footer .van-button--primary) {
-  background-color: #ea1845 !important;
-  border-color: #ea1845 !important;
+  background-color: var(--cube-primary-color) !important;
+  border-color: var(--cube-primary-color) !important;
+}
+
+/* 当 gradient 启用时，使用渐变背景 */
+:root[data-gradient-enabled="true"] :deep(.filter-footer .van-button--primary) {
+  background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 :deep(.filter-footer .van-button--primary:active) {
-  background-color: #c4123a !important;
-  border-color: #c4123a !important;
+  background-color: var(--cube-primary-dark) !important;
+  border-color: var(--cube-primary-dark) !important;
+}
+
+:root[data-gradient-enabled="true"] :deep(.filter-footer .van-button--primary:active) {
+  opacity: 0.9;
+  filter: brightness(0.95);
+  background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
+  background-color: transparent !important;
 }
 
 /* Picker 确认按钮文字颜色使用主题色 */
 :deep(.van-picker__confirm) {
-  color: #ea1845 !important;
+  color: var(--cube-primary-color) !important;
 }
 
 /* 底部导航栏样式 */
 :deep(.van-tabbar-item--active) {
-  color: #ea1845;
+  color: var(--cube-primary-color);
 }
 
 :deep(.van-tabbar-item__icon) {
