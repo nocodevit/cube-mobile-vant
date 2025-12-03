@@ -132,7 +132,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getSimById } from '@/mock.js'
+import { getSimById, getSimByIccid } from '@/mock.js'
 import { showToast, showConfirmDialog } from 'vant'
 import themeConfig from '@/config/theme.js'
 
@@ -145,8 +145,13 @@ const switchLoading = ref(false)
 const switchValue = computed(() => sim.value?.status === 'active')
 
 onMounted(() => {
-  const id = route.params.id
-  sim.value = getSimById(id)
+  // 从 query 参数中读取 ICCID
+  const iccid = route.query.iccid
+  
+  if (iccid) {
+    sim.value = getSimByIccid(iccid)
+  }
+  
   if (!sim.value) {
     showToast('SIM card not found')
     setTimeout(() => {
@@ -211,7 +216,10 @@ const handleRefresh = async () => {
 
 // 查看短信
 const handleViewSMS = () => {
-  router.push(`/sim-sms/${route.params.id}`)
+  // 使用 sim.id 作为参数（保持向后兼容）
+  if (sim.value) {
+    router.push(`/sim-sms/${sim.value.id}`)
+  }
 }
 
 // 发送短信

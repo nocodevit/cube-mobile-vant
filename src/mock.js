@@ -237,6 +237,11 @@ export function getSimById(id) {
   return mockSimList.find(sim => sim.id === id) || null
 }
 
+// 根据 ICCID 获取 SIM 详情
+export function getSimByIccid(iccid) {
+  return mockSimList.find(sim => sim.iccid === iccid) || null
+}
+
 // 搜索 SIM 卡
 export function searchSims(keyword) {
   if (!keyword) return mockSimList

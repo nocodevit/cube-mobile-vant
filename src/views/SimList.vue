@@ -43,7 +43,7 @@
       <van-pull-refresh v-model="refreshing" @refresh="onRefresh" loading-text="Loading...">
         <van-list v-model:loading="loading" :finished="finished" finished-text="No more data" loading-text="Loading..."
           @load="onLoad">
-          <van-cell v-for="sim in displayList" :key="sim.id" is-link @click="goToDetail(sim.id)" class="sim-item">
+          <van-cell v-for="sim in displayList" :key="sim.id" is-link @click="goToDetail(sim)" class="sim-item">
             <template #title>
               <div class="sim-item-header">
                 <div class="sim-iccid">{{ sim.iccid }}</div>
@@ -381,8 +381,12 @@ const onTagConfirm = ({ selectedOptions }) => {
 }
 
 // 跳转详情
-const goToDetail = (id) => {
-  router.push(`/sim-detail/${id}`)
+const goToDetail = (sim) => {
+  // 使用 query 参数传递 ICCID
+  router.push({
+    path: '/sim-detail',
+    query: { iccid: sim.iccid }
+  })
 }
 
 // 获取状态类型

@@ -15,7 +15,7 @@ const routes = [
     component: SimList
   },
   {
-    path: '/sim-detail/:id',
+    path: '/sim-detail',
     name: 'SimDetail',
     component: SimDetail
   },
