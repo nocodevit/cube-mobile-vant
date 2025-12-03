@@ -94,7 +94,7 @@ export const themes = {
 }
 
 // 当前使用的主题（可以通过修改这里来切换主题）
-export const currentThemeName = 'thg' // 可选值: 'linksfield', 'thg'
+export const currentThemeName = 'linksfield' // 可选值: 'linksfield', 'thg'
 
 // 获取当前主题配置
 export const getCurrentTheme = () => {

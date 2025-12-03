@@ -107,10 +107,7 @@
 
       <!-- 操作按钮 -->
       <div class="action-buttons">
-        <van-button v-if="sim.status === 'pre-activated'" type="primary" block round icon="success" @click="handleActivate">
-          Activate
-        </van-button>
-        <van-button type="primary" block round icon="replay" :style="sim.status === 'pre-activated' ? 'margin-top: 12px;' : ''" @click="handleRefresh">
+        <van-button type="primary" block round icon="replay" @click="handleRefresh">
           Refresh SIM
         </van-button>
         <van-button type="default" block round icon="chat-o" style="margin-top: 12px;" @click="handleViewSMS">
@@ -120,6 +117,13 @@
           Send SMS
         </van-button>
       </div>
+    </div>
+    
+    <!-- Sticky Activate Button (仅当状态为 pre-activated 时显示) -->
+    <div v-if="sim.status === 'pre-activated'" class="sticky-activate-button">
+      <van-button type="primary" block round icon="success" @click="handleActivate">
+        Activate
+      </van-button>
     </div>
   </div>
   <van-empty v-else description="SIM not found" />
@@ -279,6 +283,8 @@ const handleSwitchChange = async (value) => {
   padding-bottom: 20px;
   min-height: 100vh;
   background-color: var(--cube-background);
+  position: relative;
+  padding-bottom: 80px; /* 为底部按钮留出空间 */
 }
 
 .detail-content {
@@ -569,5 +575,18 @@ const handleSwitchChange = async (value) => {
   filter: brightness(0.95);
   background: linear-gradient(135deg, var(--cube-gradient-start) 0%, var(--cube-gradient-end) 100%) !important;
   background-color: transparent !important;
+}
+
+/* Sticky Activate Button */
+.sticky-activate-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  border-top: 1px solid var(--cube-border-color);
 }
 </style>
