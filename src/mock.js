@@ -348,7 +348,7 @@ export function getSimsPaginated(filters, page = 1, pageSize = 20) {
   }
 }
 
-// Mock SMS 消息数据
+// Mock SMS 消息数据（用于聊天界面）
 export function getSmsMessages(simId) {
   // 根据 simId 返回不同的消息列表
   const messages = [
@@ -414,3 +414,165 @@ export function getSmsMessages(simId) {
   return messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
 }
 
+// Mock SMS 列表数据（用于列表页面）
+const mockSmsList = [
+  {
+    id: 'sms1',
+    iccid: '89430103524107987990',
+    direction: 'MT', // 平台发给手机
+    status: 'success',
+    timestamp: new Date().getTime() - 2 * 60 * 60 * 1000, // 2小时前
+    content: 'Welcome to Cube Mobile! Your SIM card has been activated successfully.',
+    senderName: 'System Admin'
+  },
+  {
+    id: 'sms2',
+    iccid: '8944538532045134792',
+    direction: 'MO', // 手机发给平台
+    status: 'success',
+    timestamp: new Date().getTime() - 5 * 60 * 60 * 1000, // 5小时前
+    content: 'Thank you for the service!',
+    senderName: null
+  },
+  {
+    id: 'sms3',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'failed',
+    timestamp: new Date().getTime() - 1 * 24 * 60 * 60 * 1000, // 1天前
+    content: 'Your data usage is at 50% of your monthly limit.',
+    senderName: 'Data Monitor'
+  },
+  {
+    id: 'sms4',
+    iccid: '89852202508070000001',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 2 * 24 * 60 * 60 * 1000, // 2天前
+    content: 'I need help with my account.',
+    senderName: null
+  },
+  {
+    id: 'sms5',
+    iccid: '8944538532045134792',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 3 * 24 * 60 * 60 * 1000, // 3天前
+    content: 'Reminder: Your plan will expire soon. Please renew to continue service.',
+    senderName: 'Billing Team'
+  },
+  {
+    id: 'sms6',
+    iccid: '89430103524107987991',
+    direction: 'MT',
+    status: 'failed',
+    timestamp: new Date().getTime() - 5 * 24 * 60 * 60 * 1000, // 5天前
+    content: 'Your SIM card status has been updated to Active.',
+    senderName: 'System Admin'
+  },
+  {
+    id: 'sms7',
+    iccid: '8944538532045134794',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 7 * 24 * 60 * 60 * 1000, // 7天前
+    content: 'Great! Thanks for the update.',
+    senderName: null
+  },
+  {
+    id: 'sms8',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 10 * 24 * 60 * 60 * 1000, // 10天前
+    content: 'You have used 80% of your monthly data allowance. Consider upgrading your plan.',
+    senderName: 'Data Monitor'
+  },
+  {
+    id: 'sms9',
+    iccid: '89852202508070000002',
+    direction: 'MO',
+    status: 'failed',
+    timestamp: new Date().getTime() - 15 * 24 * 60 * 60 * 1000, // 15天前
+    content: 'Can you check my account balance?',
+    senderName: null
+  },
+  {
+    id: 'sms10',
+    iccid: '89430103524107987992',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 20 * 24 * 60 * 60 * 1000, // 20天前
+    content: 'Your payment has been processed successfully.',
+    senderName: 'Payment System'
+  },
+  {
+    id: 'sms11',
+    iccid: '8944538532045134792',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 25 * 24 * 60 * 60 * 1000, // 25天前
+    content: 'I want to upgrade my plan.',
+    senderName: null
+  },
+  {
+    id: 'sms12',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 30 * 24 * 60 * 60 * 1000, // 30天前
+    content: 'Welcome to our service! We hope you enjoy using it.',
+    senderName: 'Customer Service'
+  }
+]
+
+// 获取SMS列表（支持筛选）
+export function getSmsList(filters = {}) {
+  let results = [...mockSmsList]
+  
+  // 按ICCID筛选
+  if (filters.iccid) {
+    const lowerIccid = filters.iccid.toLowerCase()
+    results = results.filter(sms => sms.iccid.toLowerCase().includes(lowerIccid))
+  }
+  
+  // 按时间段筛选
+  if (filters.timeRange) {
+    const now = new Date().getTime()
+    let startTime = 0
+    
+    switch (filters.timeRange) {
+      case 'today':
+        startTime = new Date().setHours(0, 0, 0, 0)
+        break
+      case 'last3days':
+        startTime = now - 3 * 24 * 60 * 60 * 1000
+        break
+      case 'last30days':
+        startTime = now - 30 * 24 * 60 * 60 * 1000
+        break
+      default:
+        startTime = 0
+    }
+    
+    results = results.filter(sms => sms.timestamp >= startTime)
+  }
+  
+  // 按方向筛选（可选）
+  if (filters.direction) {
+    results = results.filter(sms => sms.direction === filters.direction)
+  }
+  
+  // 按状态筛选（可选）
+  if (filters.status) {
+    results = results.filter(sms => sms.status === filters.status)
+  }
+  
+  // 按时间倒序排列
+  return results.sort((a, b) => b.timestamp - a.timestamp)
+}
+
+// 根据ID获取SMS详情
+export function getSmsById(id) {
+  return mockSmsList.find(sms => sms.id === id) || null
+}

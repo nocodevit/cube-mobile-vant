@@ -131,7 +131,7 @@
     <!-- 底部导航栏 -->
     <van-tabbar v-model="activeTabbar" fixed>
       <van-tabbar-item icon="apps-o" to="/sim-list">SIM</van-tabbar-item>
-      <van-tabbar-item icon="chat-o">SMS</van-tabbar-item>
+      <van-tabbar-item icon="chat-o" to="/sim-sms">SMS</van-tabbar-item>
       <van-tabbar-item icon="exchange" to="/switch-enterprise">Switch</van-tabbar-item>
       <van-tabbar-item icon="arrow" @click="handleLogout">Logout</van-tabbar-item>
     </van-tabbar>

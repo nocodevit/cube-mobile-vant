@@ -20,8 +20,13 @@ const routes = [
     component: SimDetail
   },
   {
-    path: '/sim-sms/:id',
+    path: '/sim-sms',
     name: 'SimSMS',
+    component: SimSMS
+  },
+  {
+    path: '/sim-sms/:id',
+    name: 'SimSMSDetail',
     component: SimSMS
   },
   {
