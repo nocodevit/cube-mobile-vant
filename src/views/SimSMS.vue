@@ -83,7 +83,7 @@
             <div class="detail-value">
               <van-icon :name="selectedSms.direction === 'MT' ? 'arrow-down' : 'arrow-up'" 
                 :class="['direction-icon', selectedSms.direction === 'MT' ? 'mt' : 'mo']" />
-              <span style="margin-left: 8px;">{{ selectedSms.direction === 'MT' ? 'MT (Platform to Mobile)' : 'MO (Mobile to Platform)' }}</span>
+              <span style="margin-left: 8px;">{{ selectedSms.direction === 'MT' ? 'MT (Platform to Device)' : 'MO (Device to Platform)' }}</span>
             </div>
           </div>
           <div class="detail-section">
@@ -104,7 +104,15 @@
           </div>
           <div class="detail-section content-section">
             <div class="detail-label">Content</div>
-            <div class="detail-value content-text">{{ selectedSms.content }}</div>
+            <div class="content-text-wrapper">
+              <div class="content-text">
+                {{ selectedSms.content }}
+                <div class="copy-icon-overlay" @click="copyContent">
+                  <div class="copy-box-back"></div>
+                  <div class="copy-box-front"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -242,6 +250,40 @@ const formatDetailTime = (timestamp) => {
     second: '2-digit',
     hour12: false
   })
+}
+
+// 复制内容
+const copyContent = async () => {
+  if (!selectedSms.value) return
+  
+  try {
+    await navigator.clipboard.writeText(selectedSms.value.content)
+    showToast({
+      type: 'success',
+      message: 'Content copied to clipboard'
+    })
+  } catch (err) {
+    // 降级方案：使用传统方法
+    const textArea = document.createElement('textarea')
+    textArea.value = selectedSms.value.content
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = '0'
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      showToast({
+        type: 'success',
+        message: 'Content copied to clipboard'
+      })
+    } catch (err) {
+      showToast({
+        type: 'fail',
+        message: 'Failed to copy content'
+      })
+    }
+    document.body.removeChild(textArea)
+  }
 }
 
 // 处理登出
@@ -538,6 +580,7 @@ const handleLogout = async () => {
   font-weight: 500;
 }
 
+
 .detail-value {
   font-size: 16px;
   color: var(--cube-text-primary);
@@ -545,14 +588,58 @@ const handleLogout = async () => {
   align-items: center;
 }
 
+.content-text-wrapper {
+  margin-top: 8px;
+}
+
 .content-text {
+  position: relative;
   line-height: 1.6;
   word-wrap: break-word;
   white-space: pre-wrap;
   padding: 12px;
+  padding-bottom: 40px;
   background-color: #f7f8fa;
   border-radius: 8px;
-  margin-top: 8px;
+}
+
+.copy-icon-overlay {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s;
+}
+
+.copy-icon-overlay:active {
+  opacity: 0.7;
+}
+
+.copy-box-back,
+.copy-box-front {
+  position: absolute;
+  border: 1.5px solid #646566;
+  background-color: transparent;
+  border-radius: 2px;
+}
+
+.copy-box-back {
+  width: 14px;
+  height: 14px;
+  top: 4px;
+  left: 0;
+  opacity: 0.5;
+}
+
+.copy-box-front {
+  width: 14px;
+  height: 14px;
+  top: 0;
+  left: 4px;
+  opacity: 1;
+  background-color: #fff;
 }
 
 /* 底部导航栏样式 */
