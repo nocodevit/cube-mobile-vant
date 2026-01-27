@@ -46,7 +46,13 @@
           <van-cell v-for="sim in displayList" :key="sim.id" is-link @click="goToDetail(sim)" class="sim-item">
             <template #title>
               <div class="sim-item-header">
-                <div class="sim-iccid">{{ sim.iccid }}</div>
+                <div class="sim-iccid-wrapper">
+                  <div class="sim-iccid">{{ sim.iccid }}</div>
+                  <div class="copy-icon-overlay" @click.stop="copyIccid(sim.iccid)">
+                    <div class="copy-box-back"></div>
+                    <div class="copy-box-front"></div>
+                  </div>
+                </div>
                 <van-tag :type="getStatusType(sim.status)" size="small" class="status-tag" :data-status="sim.status">
                   {{ sim.statusText }}
                 </van-tag>
@@ -428,6 +434,38 @@ const getProgressColor = (sim) => {
   return themeConfig.primary
 }
 
+// 复制 ICCID
+const copyIccid = async (iccid) => {
+  try {
+    await navigator.clipboard.writeText(iccid)
+    showToast({
+      type: 'success',
+      message: 'ICCID copied to clipboard'
+    })
+  } catch (err) {
+    // 降级方案：使用传统方法
+    const textArea = document.createElement('textarea')
+    textArea.value = iccid
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = '0'
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      showToast({
+        type: 'success',
+        message: 'ICCID copied to clipboard'
+      })
+    } catch (err) {
+      showToast({
+        type: 'fail',
+        message: 'Failed to copy ICCID'
+      })
+    }
+    document.body.removeChild(textArea)
+  }
+}
+
 // 处理登出
 const handleLogout = async () => {
   try {
@@ -616,14 +654,60 @@ const handleLogout = async () => {
   margin-bottom: 8px;
 }
 
+.sim-iccid-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
 .sim-iccid {
   font-size: 16px;
   font-weight: 600;
   color: #646566;
-  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex-shrink: 1;
+}
+
+.copy-icon-overlay {
+  position: relative;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.copy-icon-overlay:active {
+  opacity: 0.7;
+}
+
+.copy-box-back,
+.copy-box-front {
+  position: absolute;
+  border: 1.5px solid #646566;
+  background-color: transparent;
+  border-radius: 2px;
+}
+
+.copy-box-back {
+  width: 14px;
+  height: 14px;
+  top: 4px;
+  left: 0;
+  opacity: 0.5;
+}
+
+.copy-box-front {
+  width: 14px;
+  height: 14px;
+  top: 0;
+  left: 4px;
+  opacity: 1;
+  background-color: var(--cube-background, #fff);
 }
 
 .status-tag {

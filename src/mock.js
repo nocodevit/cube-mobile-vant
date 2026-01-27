@@ -426,6 +426,15 @@ const mockSmsList = [
     senderName: 'System Admin'
   },
   {
+    id: 'sms1_reply',
+    iccid: '89430103524107987990',
+    direction: 'MO', // 手机发给平台
+    status: 'success',
+    timestamp: new Date().getTime() - 1.5 * 60 * 60 * 1000, // 1.5小时前
+    content: 'Thank you! Looking forward to using the service.',
+    senderName: null
+  },
+  {
     id: 'sms2',
     iccid: '8944538532045134792',
     direction: 'MO', // 手机发给平台
@@ -442,6 +451,24 @@ const mockSmsList = [
     timestamp: new Date().getTime() - 1 * 24 * 60 * 60 * 1000, // 1天前
     content: 'Your data usage is at 50% of your monthly limit.',
     senderName: 'Data Monitor'
+  },
+  {
+    id: 'sms3_retry',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 1 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000, // 1天前 + 5分钟
+    content: 'Your data usage is at 50% of your monthly limit.',
+    senderName: 'Data Monitor'
+  },
+  {
+    id: 'sms3_reply',
+    iccid: '89430103524107987990',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 1 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000, // 1天前 + 30分钟
+    content: 'Got it, thanks for the reminder.',
+    senderName: null
   },
   {
     id: 'sms4',
@@ -489,6 +516,33 @@ const mockSmsList = [
     senderName: 'Data Monitor'
   },
   {
+    id: 'sms8_reply',
+    iccid: '89430103524107987990',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 10 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000, // 10天前 + 2小时
+    content: 'I will consider upgrading. What are my options?',
+    senderName: null
+  },
+  {
+    id: 'sms8_response',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 9 * 24 * 60 * 60 * 1000, // 9天前
+    content: 'We have several upgrade options available. Please visit our website or contact support for details.',
+    senderName: 'Customer Service'
+  },
+  {
+    id: 'sms8_final',
+    iccid: '89430103524107987990',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 9 * 24 * 60 * 60 * 1000 + 1 * 60 * 60 * 1000, // 9天前 + 1小时
+    content: 'Thanks, I will check it out.',
+    senderName: null
+  },
+  {
     id: 'sms9',
     iccid: '89852202508070000002',
     direction: 'MO',
@@ -523,6 +577,87 @@ const mockSmsList = [
     timestamp: new Date().getTime() - 30 * 24 * 60 * 60 * 1000, // 30天前
     content: 'Welcome to our service! We hope you enjoy using it.',
     senderName: 'Customer Service'
+  },
+  {
+    id: 'sms12_reply',
+    iccid: '89430103524107987990',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 30 * 24 * 60 * 60 * 1000 + 1 * 60 * 60 * 1000, // 30天前 + 1小时
+    content: 'Thank you! Excited to get started.',
+    senderName: null
+  },
+  {
+    id: 'sms_extra1',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'failed',
+    timestamp: new Date().getTime() - 5 * 24 * 60 * 60 * 1000, // 5天前
+    content: 'Your monthly bill is ready. Please check your account.',
+    senderName: 'Billing Team'
+  },
+  {
+    id: 'sms_extra1_retry',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 5 * 24 * 60 * 60 * 1000 + 10 * 60 * 1000, // 5天前 + 10分钟
+    content: 'Your monthly bill is ready. Please check your account.',
+    senderName: 'Billing Team'
+  },
+  {
+    id: 'sms_extra1_reply',
+    iccid: '89430103524107987990',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 5 * 24 * 60 * 60 * 1000 + 1 * 60 * 60 * 1000, // 5天前 + 1小时
+    content: 'I will check it now. Thanks!',
+    senderName: null
+  },
+  {
+    id: 'sms_extra2',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 3 * 24 * 60 * 60 * 1000, // 3天前
+    content: 'Your SIM card roaming has been activated.',
+    senderName: 'System Admin'
+  },
+  {
+    id: 'sms_extra2_reply',
+    iccid: '89430103524107987990',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 3 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000, // 3天前 + 45分钟
+    content: 'Perfect! That is exactly what I needed.',
+    senderName: null
+  },
+  {
+    id: 'sms_extra3',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'failed',
+    timestamp: new Date().getTime() - 15 * 24 * 60 * 60 * 1000, // 15天前
+    content: 'Your account balance is low. Please top up soon.',
+    senderName: 'Billing Team'
+  },
+  {
+    id: 'sms_extra3_retry',
+    iccid: '89430103524107987990',
+    direction: 'MT',
+    status: 'success',
+    timestamp: new Date().getTime() - 15 * 24 * 60 * 60 * 1000 + 15 * 60 * 1000, // 15天前 + 15分钟
+    content: 'Your account balance is low. Please top up soon.',
+    senderName: 'Billing Team'
+  },
+  {
+    id: 'sms_extra3_reply',
+    iccid: '89430103524107987990',
+    direction: 'MO',
+    status: 'success',
+    timestamp: new Date().getTime() - 15 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000, // 15天前 + 2小时
+    content: 'I will top up my account today.',
+    senderName: null
   }
 ]
 

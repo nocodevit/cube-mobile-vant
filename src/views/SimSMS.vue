@@ -1,69 +1,119 @@
 <template>
   <div class="sms-list-page">
-    <!-- 顶部导航栏 -->
-    <div class="custom-banner">
-      <div class="banner-content">
-        <div class="logo-container">
-          <img v-if="logoExists" :src="logoImg" alt="Logo" class="logo-img" />
-          <span v-if="themeConfig.brandName" class="brand-text">{{ themeConfig.brandName }}</span>
+    <!-- 对话模式 -->
+    <div v-if="isConversationMode" class="conversation-page">
+      <!-- 顶部导航栏 -->
+      <van-nav-bar :title="simInfo ? simInfo.iccid : 'SMS Conversation'" fixed left-arrow @click-left="$router.back()"
+        :style="{ backgroundColor: themeConfig.primary, color: '#fff' }" />
+
+      <!-- 消息列表 -->
+      <div class="messages-container">
+        <div v-for="message in messages" :key="message.id" 
+          :class="['message-item', message.type === 'sent' ? 'message-sent' : 'message-received']">
+          <div class="message-bubble">
+            <div class="message-content">{{ message.content }}</div>
+            <div class="message-time">{{ formatMessageTime(message.timestamp) }}</div>
+          </div>
         </div>
-        <div class="banner-right">
-          <div class="page-title">SMS</div>
-        </div>
+      </div>
+
+      <!-- 发送消息输入框 -->
+      <div class="message-input-section">
+        <van-field
+          v-model="newMessage"
+          type="textarea"
+          rows="2"
+          placeholder="Type a message..."
+          maxlength="140"
+          show-word-limit
+          class="message-input"
+        />
+        <van-button 
+          type="primary" 
+          round 
+          :disabled="!newMessage.trim() || sendingMessage"
+          :loading="sendingMessage"
+          @click="sendMessage"
+          class="send-button"
+        >
+          Send
+        </van-button>
       </div>
     </div>
 
-    <!-- 搜索栏和时间段选择 -->
-    <div class="search-section">
-      <div class="search-wrapper">
-        <van-search v-model="searchIccid" placeholder="Search ICCID" shape="round" @search="handleSearch"
-          @clear="handleClear" />
+    <!-- 列表模式 -->
+    <div v-else>
+      <!-- 顶部导航栏 -->
+      <div class="custom-banner">
+        <div class="banner-content">
+          <div class="logo-container">
+            <img v-if="logoExists" :src="logoImg" alt="Logo" class="logo-img" />
+            <span v-if="themeConfig.brandName" class="brand-text">{{ themeConfig.brandName }}</span>
+          </div>
+          <div class="banner-right">
+            <div class="page-title">SMS</div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- 时间段选择器 -->
-    <div class="time-range-section">
-      <van-tabs v-model:active="activeTimeRange" @change="handleTimeRangeChange" line-width="60px">
-        <van-tab title="Today" name="today"></van-tab>
-        <van-tab title="Last 3 Days" name="last3days"></van-tab>
-        <van-tab title="Last 30 Days" name="last30days"></van-tab>
-      </van-tabs>
-    </div>
+      <!-- 搜索栏和时间段选择 -->
+      <div class="search-section">
+        <div class="search-wrapper">
+          <van-search v-model="searchIccid" placeholder="Search ICCID" shape="round" @search="handleSearch"
+            @clear="handleClear" />
+        </div>
+      </div>
 
-    <!-- SMS 列表 -->
-    <div class="list-section">
-      <van-pull-refresh v-model="refreshing" @refresh="onRefresh" loading-text="Loading...">
-        <van-list v-model:loading="loading" :finished="finished" finished-text="No more data" loading-text="Loading..."
-          @load="onLoad">
-          <van-cell v-for="sms in displayList" :key="sms.id" is-link @click="showDetail(sms)" class="sms-item">
-            <template #title>
-              <div class="sms-item-header">
-                <div class="sms-iccid">{{ sms.iccid }}</div>
-                <div class="sms-direction">
-                  <van-icon :name="sms.direction === 'MT' ? 'arrow-down' : 'arrow-up'" 
-                    :class="['direction-icon', sms.direction === 'MT' ? 'mt' : 'mo']" />
-                  <span class="direction-text">{{ sms.direction }}</span>
-                </div>
-              </div>
-            </template>
-            <template #label>
-              <div class="sms-item-content">
-                <div class="sms-info-row">
-                  <div class="sms-status">
-                    <van-tag :type="sms.status === 'success' ? 'success' : 'danger'" size="small" class="status-tag">
-                      {{ sms.status === 'success' ? 'Success' : 'Failed' }}
-                    </van-tag>
+      <!-- 时间段选择器 -->
+      <div class="time-range-section">
+        <van-tabs v-model:active="activeTimeRange" @change="handleTimeRangeChange" line-width="60px">
+          <van-tab title="Today" name="today"></van-tab>
+          <van-tab title="Last 3 Days" name="last3days"></van-tab>
+          <van-tab title="Last 30 Days" name="last30days"></van-tab>
+        </van-tabs>
+      </div>
+
+      <!-- SMS 列表 -->
+      <div class="list-section">
+        <van-pull-refresh v-model="refreshing" @refresh="onRefresh" loading-text="Loading...">
+          <van-list v-model:loading="loading" :finished="finished" finished-text="No more data" loading-text="Loading..."
+            @load="onLoad">
+            <van-cell v-for="sms in displayList" :key="sms.id" is-link @click="showDetail(sms)" class="sms-item">
+              <template #title>
+                <div class="sms-item-header">
+                  <div class="sms-iccid-wrapper">
+                    <div class="sms-iccid">{{ sms.iccid }}</div>
+                    <div class="copy-icon-overlay" @click.stop="copyIccid(sms.iccid)">
+                      <div class="copy-box-back"></div>
+                      <div class="copy-box-front"></div>
+                    </div>
                   </div>
-                  <div class="sms-time">{{ formatTime(sms.timestamp) }}</div>
+                  <div class="sms-direction">
+                    <van-icon :name="sms.direction === 'MT' ? 'arrow-down' : 'arrow-up'" 
+                      :class="['direction-icon', sms.direction === 'MT' ? 'mt' : 'mo']" />
+                    <span class="direction-text">{{ sms.direction }}</span>
+                  </div>
                 </div>
-              </div>
-            </template>
-            <template #right-icon>
-              <van-icon name="arrow" />
-            </template>
-          </van-cell>
-        </van-list>
-      </van-pull-refresh>
+              </template>
+              <template #label>
+                <div class="sms-item-content">
+                  <div class="sms-info-row">
+                    <div class="sms-status">
+                      <van-tag :type="sms.status === 'success' ? 'success' : 'danger'" size="small" class="status-tag">
+                        {{ sms.status === 'success' ? 'Success' : 'Failed' }}
+                      </van-tag>
+                    </div>
+                    <div class="sms-time">{{ formatTime(sms.timestamp) }}</div>
+                  </div>
+                </div>
+              </template>
+              <template #right-icon>
+                <van-icon name="arrow" />
+              </template>
+            </van-cell>
+          </van-list>
+        </van-pull-refresh>
+      </div>
     </div>
 
     <!-- 详情弹窗 -->
@@ -130,13 +180,16 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getSmsList } from '@/mock.js'
+import { useRoute } from 'vue-router'
+import { getSmsList, getSimByIccid } from '@/mock.js'
 import themeConfig from '@/config/theme.js'
 import { showConfirmDialog, showToast } from 'vant'
 
 // 导入所有可能的 logo
 import logoLinksfield from '@/assets/logo.png'
 import logoThg from '@/assets/logo-thg.png'
+
+const route = useRoute()
 
 // 根据主题配置选择对应的 logo
 const logoImg = computed(() => {
@@ -149,6 +202,14 @@ const logoImg = computed(() => {
 
 const logoExists = ref(true)
 
+// 对话模式相关
+const isConversationMode = ref(false)
+const messages = ref([])
+const simInfo = ref(null)
+const newMessage = ref('')
+const sendingMessage = ref(false)
+
+// 列表模式相关
 const searchIccid = ref('')
 const activeTimeRange = ref('today') // 默认今天
 const refreshing = ref(false)
@@ -162,8 +223,112 @@ const displayList = ref([])
 
 // 初始化数据
 onMounted(() => {
-  loadData()
+  // 检查是否进入对话模式（通过路由参数 id 或 query.iccid）
+  const routeId = route.params.id
+  const queryIccid = route.query.iccid
+  
+  if (routeId || queryIccid) {
+    // 进入对话模式
+    isConversationMode.value = true
+    let targetIccid = queryIccid
+    
+    // 如果没有 query.iccid，尝试通过 id 获取 iccid（向后兼容）
+    if (!targetIccid && routeId) {
+      // 这里可以添加通过 id 获取 iccid 的逻辑
+      // 暂时跳过，因为现在使用 iccid
+    }
+    
+    if (targetIccid) {
+      // 获取 SIM 信息
+      simInfo.value = getSimByIccid(targetIccid)
+      
+      // 加载该 ICCID 的所有短信
+      loadConversationMessages(targetIccid)
+    }
+  } else {
+    // 列表模式
+    isConversationMode.value = false
+    loadData()
+  }
 })
+
+// 加载对话消息
+const loadConversationMessages = (iccid) => {
+  // 获取该 ICCID 的所有短信
+  const smsList = getSmsList({ iccid })
+  
+  // 转换为对话格式：MT (平台发给设备) = received, MO (设备发给平台) = sent
+  messages.value = smsList
+    .map(sms => ({
+      id: sms.id,
+      type: sms.direction === 'MT' ? 'received' : 'sent',
+      content: sms.content,
+      timestamp: sms.timestamp,
+      status: sms.status
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp) // 按时间正序排列
+}
+
+// 发送消息
+const sendMessage = async () => {
+  if (!newMessage.value.trim() || sendingMessage.value) return
+  
+  sendingMessage.value = true
+  
+  // 模拟发送延迟
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  // 创建新消息（MO - 设备发给平台）
+  const newMsg = {
+    id: `msg_${Date.now()}`,
+    type: 'sent',
+    content: newMessage.value.trim(),
+    timestamp: Date.now(),
+    status: 'success'
+  }
+  
+  // 添加到消息列表
+  messages.value.push(newMsg)
+  
+  // 清空输入框
+  newMessage.value = ''
+  sendingMessage.value = false
+  
+  showToast({
+    type: 'success',
+    message: 'Message sent successfully!'
+  })
+  
+  // 滚动到底部
+  setTimeout(() => {
+    const container = document.querySelector('.messages-container')
+    if (container) {
+      container.scrollTop = container.scrollHeight
+    }
+  }, 100)
+}
+
+// 格式化消息时间
+const formatMessageTime = (timestamp) => {
+  const date = new Date(timestamp)
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  
+  if (messageDate.getTime() === today.getTime()) {
+    // 今天，只显示时间
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+  } else {
+    // 其他日期，显示日期和时间
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false
+    })
+  }
+}
 
 // 加载数据
 const loadData = () => {
@@ -214,6 +379,38 @@ const onLoad = () => {
 const showDetail = (sms) => {
   selectedSms.value = sms
   showDetailPopup.value = true
+}
+
+// 复制 ICCID
+const copyIccid = async (iccid) => {
+  try {
+    await navigator.clipboard.writeText(iccid)
+    showToast({
+      type: 'success',
+      message: 'ICCID copied to clipboard'
+    })
+  } catch (err) {
+    // 降级方案：使用传统方法
+    const textArea = document.createElement('textarea')
+    textArea.value = iccid
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = '0'
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      showToast({
+        type: 'success',
+        message: 'ICCID copied to clipboard'
+      })
+    } catch (err) {
+      showToast({
+        type: 'fail',
+        message: 'Failed to copy ICCID'
+      })
+    }
+    document.body.removeChild(textArea)
+  }
 }
 
 // 格式化时间（列表显示）
@@ -434,14 +631,76 @@ const handleLogout = async () => {
   margin-bottom: 8px;
 }
 
+.sms-iccid-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
 .sms-iccid {
   font-size: 16px;
   font-weight: 600;
   color: #646566;
-  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex-shrink: 1;
+}
+
+/* 列表中的复制图标 */
+.sms-iccid-wrapper .copy-icon-overlay {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* 通用的复制图标样式 */
+.copy-icon-overlay {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s;
+}
+
+.copy-icon-overlay:active {
+  opacity: 0.7;
+}
+
+.copy-box-back,
+.copy-box-front {
+  position: absolute;
+  border: 1.5px solid #646566;
+  background-color: transparent;
+  border-radius: 2px;
+}
+
+.copy-box-back {
+  width: 14px;
+  height: 14px;
+  top: 4px;
+  left: 0;
+  opacity: 0.5;
+}
+
+.copy-box-front {
+  width: 14px;
+  height: 14px;
+  top: 0;
+  left: 4px;
+  opacity: 1;
+  background-color: #fff;
+}
+
+/* 详情弹窗中的复制图标 */
+.content-text-wrapper .copy-icon-overlay {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}
+
+.content-text-wrapper .copy-box-front {
+  background-color: #f7f8fa;
 }
 
 .sms-direction {
@@ -603,44 +862,6 @@ const handleLogout = async () => {
   border-radius: 8px;
 }
 
-.copy-icon-overlay {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  transition: all 0.2s;
-}
-
-.copy-icon-overlay:active {
-  opacity: 0.7;
-}
-
-.copy-box-back,
-.copy-box-front {
-  position: absolute;
-  border: 1.5px solid #646566;
-  background-color: transparent;
-  border-radius: 2px;
-}
-
-.copy-box-back {
-  width: 14px;
-  height: 14px;
-  top: 4px;
-  left: 0;
-  opacity: 0.5;
-}
-
-.copy-box-front {
-  width: 14px;
-  height: 14px;
-  top: 0;
-  left: 4px;
-  opacity: 1;
-  background-color: #fff;
-}
 
 /* 底部导航栏样式 */
 :deep(.van-tabbar-item--active) {
@@ -649,5 +870,149 @@ const handleLogout = async () => {
 
 :deep(.van-tabbar-item__icon) {
   font-size: 22px;
+}
+
+/* 对话模式样式 */
+.conversation-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding-top: 46px;
+  padding-bottom: 0;
+  background-color: var(--cube-background);
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 80px;
+}
+
+.message-item {
+  display: flex;
+  margin-bottom: 12px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-sent {
+  justify-content: flex-end;
+}
+
+.message-received {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  position: relative;
+}
+
+.message-sent .message-bubble {
+  background-color: var(--cube-primary-color);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.message-received .message-bubble {
+  background-color: #fff;
+  color: var(--cube-text-primary);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message-content {
+  font-size: 15px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.message-time {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.message-sent .message-time {
+  color: rgba(255, 255, 255, 0.8);
+  text-align: right;
+}
+
+.message-received .message-time {
+  color: var(--cube-text-secondary);
+  text-align: left;
+}
+
+.message-input-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid #ebedf0;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 100;
+}
+
+.message-input {
+  flex: 1;
+  background-color: #f7f8fa;
+  border-radius: 20px;
+  padding: 8px 16px;
+}
+
+:deep(.message-input .van-field__control) {
+  background-color: transparent;
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 0;
+}
+
+:deep(.message-input .van-field__word-limit) {
+  color: var(--cube-text-secondary);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.send-button {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 20px;
+}
+
+:deep(.van-nav-bar) {
+  background-color: var(--cube-primary-color);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  overflow: hidden;
+}
+
+:deep(.van-nav-bar__title) {
+  color: #fff;
+}
+
+:deep(.van-nav-bar__arrow),
+:deep(.van-nav-bar__arrow::before) {
+  color: #fff !important;
+  border-color: #fff !important;
 }
 </style>

@@ -125,6 +125,41 @@
         Activate
       </van-button>
     </div>
+
+    <!-- 发送 SMS 底部抽屉 -->
+    <van-popup v-model:show="showSendSmsSheet" position="bottom" :style="{ height: '50%' }" round>
+      <div class="send-sms-sheet">
+        <div class="sheet-header">
+          <span class="sheet-title">Send SMS</span>
+          <van-icon name="cross" class="close-icon" @click="showSendSmsSheet = false" />
+        </div>
+        <div class="sheet-content">
+          <div class="sms-input-section">
+            <div class="input-label">Message Content</div>
+            <van-field
+              v-model="smsContent"
+              type="textarea"
+              rows="3"
+              placeholder="Enter your message here..."
+              maxlength="140"
+              show-word-limit
+              class="sms-textarea"
+            />
+          </div>
+        </div>
+        <div class="sheet-footer">
+          <van-button 
+            type="primary" 
+            block 
+            round 
+            :loading="sendingSms"
+            @click="handleSendSmsSubmit"
+          >
+            Send
+          </van-button>
+        </div>
+      </div>
+    </van-popup>
   </div>
   <van-empty v-else description="SIM not found" />
 </template>
@@ -140,6 +175,9 @@ const route = useRoute()
 const router = useRouter()
 const sim = ref(null)
 const switchLoading = ref(false)
+const showSendSmsSheet = ref(false)
+const smsContent = ref('')
+const sendingSms = ref(false)
 
 // Switch 的值：true = active, false = paused
 const switchValue = computed(() => sim.value?.status === 'active')
@@ -216,15 +254,54 @@ const handleRefresh = async () => {
 
 // 查看短信
 const handleViewSMS = () => {
-  // 使用 sim.id 作为参数（保持向后兼容）
+  // 使用 iccid 作为 query 参数来显示对话模式
   if (sim.value) {
-    router.push(`/sim-sms/${sim.value.id}`)
+    router.push({
+      path: '/sim-sms',
+      query: { iccid: sim.value.iccid }
+    })
   }
 }
 
-// 发送短信
+// 发送短信 - 打开底部抽屉
 const handleSendSMS = () => {
-  showToast('SMS feature coming soon')
+  smsContent.value = ''
+  showSendSmsSheet.value = true
+}
+
+// 提交发送短信
+const handleSendSmsSubmit = async () => {
+  if (!smsContent.value.trim()) {
+    showToast({
+      type: 'fail',
+      message: 'Please enter message content'
+    })
+    return
+  }
+
+  sendingSms.value = true
+
+  // 模拟发送延迟
+  await new Promise(resolve => setTimeout(resolve, 1500))
+
+  // 模拟成功或失败（90% 成功率）
+  const success = Math.random() > 0.1
+
+  sendingSms.value = false
+  showSendSmsSheet.value = false
+
+  if (success) {
+    showToast({
+      type: 'success',
+      message: 'SMS sent successfully!'
+    })
+    smsContent.value = ''
+  } else {
+    showToast({
+      type: 'fail',
+      message: 'Failed to send SMS. Please try again.'
+    })
+  }
 }
 
 // 激活 SIM 卡
@@ -596,5 +673,75 @@ const handleSwitchChange = async (value) => {
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
   border-top: 1px solid var(--cube-border-color);
+}
+
+/* 发送 SMS 底部抽屉样式 */
+.send-sms-sheet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #ebedf0;
+}
+
+.sheet-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cube-text-primary);
+}
+
+.close-icon {
+  font-size: 20px;
+  color: var(--cube-text-secondary);
+  cursor: pointer;
+}
+
+.close-icon:active {
+  opacity: 0.7;
+}
+
+.sheet-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.sms-input-section {
+  width: 100%;
+}
+
+.input-label {
+  font-size: 14px;
+  color: var(--cube-text-secondary);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.sms-textarea {
+  background-color: #f7f8fa;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+:deep(.sms-textarea .van-field__control) {
+  background-color: transparent;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+:deep(.sms-textarea .van-field__word-limit) {
+  color: var(--cube-text-secondary);
+  font-size: 12px;
+}
+
+.sheet-footer {
+  padding: 16px;
+  border-top: 1px solid #ebedf0;
 }
 </style>
