@@ -88,19 +88,21 @@
                       <div class="copy-box-front"></div>
                     </div>
                   </div>
-                  <div class="sms-direction">
-                    <van-icon :name="sms.direction === 'MT' ? 'arrow-down' : 'arrow-up'" 
-                      :class="['direction-icon', sms.direction === 'MT' ? 'mt' : 'mo']" />
-                    <span class="direction-text">{{ sms.direction }}</span>
-                  </div>
                 </div>
               </template>
               <template #label>
                 <div class="sms-item-content">
+                  <div class="sms-msisdn-row">
+                    <span class="msisdn-label">MSISDN:</span>
+                    <span class="msisdn-value">{{ sms.msisdn || 'N/A' }}</span>
+                  </div>
                   <div class="sms-info-row">
                     <div class="sms-status">
                       <van-tag :type="sms.status === 'success' ? 'success' : 'danger'" size="small" class="status-tag">
                         {{ sms.status === 'success' ? 'Success' : 'Failed' }}
+                      </van-tag>
+                      <van-tag v-if="sms.replies && sms.replies.length > 0" type="primary" size="small" class="reply-tag">
+                        Has Reply
                       </van-tag>
                     </div>
                     <div class="sms-time">{{ formatTime(sms.timestamp) }}</div>
@@ -129,12 +131,8 @@
             <div class="detail-value">{{ selectedSms.iccid }}</div>
           </div>
           <div class="detail-section">
-            <div class="detail-label">Direction</div>
-            <div class="detail-value">
-              <van-icon :name="selectedSms.direction === 'MT' ? 'arrow-down' : 'arrow-up'" 
-                :class="['direction-icon', selectedSms.direction === 'MT' ? 'mt' : 'mo']" />
-              <span style="margin-left: 8px;">{{ selectedSms.direction === 'MT' ? 'MT (Platform to Device)' : 'MO (Device to Platform)' }}</span>
-            </div>
+            <div class="detail-label">MSISDN</div>
+            <div class="detail-value">{{ selectedSms.msisdn || 'N/A' }}</div>
           </div>
           <div class="detail-section">
             <div class="detail-label">Status</div>
@@ -161,6 +159,22 @@
                   <div class="copy-box-back"></div>
                   <div class="copy-box-front"></div>
                 </div>
+              </div>
+            </div>
+          </div>
+          <!-- 回复内容 -->
+          <div v-if="selectedSms.replies && selectedSms.replies.length > 0" class="detail-section replies-section">
+            <div class="detail-label">Replies</div>
+            <div v-for="(reply, index) in selectedSms.replies" :key="index" class="reply-item">
+              <div class="reply-content-wrapper">
+                <div class="reply-content-text">
+                  {{ reply.content }}
+                  <div class="copy-icon-overlay" @click="copyReplyContent(reply.content)">
+                    <div class="copy-box-back"></div>
+                    <div class="copy-box-front"></div>
+                  </div>
+                </div>
+                <div class="reply-time">{{ formatDetailTime(reply.timestamp) }}</div>
               </div>
             </div>
           </div>
@@ -483,6 +497,40 @@ const copyContent = async () => {
   }
 }
 
+// 复制回复内容
+const copyReplyContent = async (content) => {
+  if (!content) return
+  
+  try {
+    await navigator.clipboard.writeText(content)
+    showToast({
+      type: 'success',
+      message: 'Reply content copied to clipboard'
+    })
+  } catch (err) {
+    // 降级方案：使用传统方法
+    const textArea = document.createElement('textarea')
+    textArea.value = content
+    textArea.style.position = 'fixed'
+    textArea.style.opacity = '0'
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      showToast({
+        type: 'success',
+        message: 'Reply content copied to clipboard'
+      })
+    } catch (err) {
+      showToast({
+        type: 'fail',
+        message: 'Failed to copy reply content'
+      })
+    }
+    document.body.removeChild(textArea)
+  }
+}
+
 // 处理登出
 const handleLogout = async () => {
   try {
@@ -629,6 +677,16 @@ const handleLogout = async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  gap: 8px;
+}
+
+/* Has Reply 标签样式 - 与 SIM 标签保持一致 */
+:deep(.reply-tag) {
+  border-radius: 5px !important;
+  background-color: rgba(234, 24, 69, 0.05) !important;
+  color: var(--cube-primary-color) !important;
+  border: 1px solid rgba(234, 24, 69, 0.35) !important;
+  padding: 2px 8px;
 }
 
 .sms-iccid-wrapper {
@@ -703,34 +761,23 @@ const handleLogout = async () => {
   background-color: #f7f8fa;
 }
 
-.sms-direction {
+.sms-msisdn-row {
   display: flex;
   align-items: center;
-  margin-left: 16px;
-  margin-right: 16px;
-  gap: 4px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
-.direction-icon {
-  font-size: 18px;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.direction-icon.mt {
-  color: #07c160;
-  background-color: rgba(7, 193, 96, 0.1);
-}
-
-.direction-icon.mo {
-  color: #1989fa;
-  background-color: rgba(25, 137, 250, 0.1);
-}
-
-.direction-text {
+.msisdn-label {
   font-size: 13px;
+  color: var(--cube-text-secondary);
   font-weight: 500;
+}
+
+.msisdn-value {
+  font-size: 14px;
   color: #646566;
+  font-weight: 500;
 }
 
 .sms-item-content {
@@ -747,6 +794,7 @@ const handleLogout = async () => {
 .sms-status {
   display: flex;
   align-items: center;
+  gap: 6px;
 }
 
 .status-tag {
@@ -860,6 +908,50 @@ const handleLogout = async () => {
   padding-bottom: 40px;
   background-color: #f7f8fa;
   border-radius: 8px;
+}
+
+/* 回复内容样式 */
+.replies-section {
+  margin-top: 24px;
+}
+
+.reply-item {
+  margin-bottom: 16px;
+}
+
+.reply-item:last-child {
+  margin-bottom: 0;
+}
+
+.reply-content-wrapper {
+  margin-top: 8px;
+}
+
+.reply-content-text {
+  position: relative;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  padding: 12px;
+  padding-bottom: 40px;
+  background-color: #f7f8fa;
+  border-radius: 8px;
+}
+
+.reply-time {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--cube-text-secondary);
+}
+
+.reply-content-wrapper .copy-icon-overlay {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}
+
+.reply-content-wrapper .copy-box-front {
+  background-color: #f7f8fa;
 }
 
 

@@ -665,6 +665,36 @@ const mockSmsList = [
 export function getSmsList(filters = {}) {
   let results = [...mockSmsList]
   
+  // 为每个 SMS 添加 MSISDN 和回复内容
+  results = results.map(sms => {
+    const sim = getSimByIccid(sms.iccid)
+    const msisdn = sim ? sim.msisdn : ''
+    
+    // 只有发送成功（status === 'success'）的 MT 类型 SMS 才可能有回复
+    let replies = []
+    if (sms.direction === 'MT' && sms.status === 'success') {
+      // 查找该 ICCID 下，时间晚于当前 SMS 的 MO 类型回复
+      replies = mockSmsList
+        .filter(reply => 
+          reply.iccid === sms.iccid &&
+          reply.direction === 'MO' &&
+          reply.timestamp > sms.timestamp
+        )
+        .map(reply => ({
+          content: reply.content,
+          timestamp: reply.timestamp,
+          status: reply.status
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp) // 按时间正序
+    }
+    
+    return {
+      ...sms,
+      msisdn,
+      replies
+    }
+  })
+  
   // 按ICCID筛选
   if (filters.iccid) {
     const lowerIccid = filters.iccid.toLowerCase()
